@@ -17,14 +17,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 //  Format: international number without spaces or + sign
 //  Example: 2348012345678  (for +234 801 234 5678)
 // ============================================================
-const WHATSAPP_NUMBER = '234XXXXXXXXXX';  // <-- REPLACE WITH YOUR NUMBER
+const WHATSAPP_NUMBER = '2349035930050';  // <-- REPLACE WITH YOUR NUMBER
 
 // ============================================================
 //  SYSTEM SETTINGS (you can change these)
 // ============================================================
 const CYCLE_DAYS     = 30;   // Number of days per payment cycle
 const ALERT_DAYS     = 5;    // Warn admin when X days remain
-const CENTRE_NAME    = 'Zenith Tutorial Centre'; // Displayed in UI
+const CENTRE_NAME    = '360 ACADEMY'; // Displayed in UI
 
 // ============================================================
 //  SUPABASE CLIENT INITIALISATION
