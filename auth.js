@@ -120,5 +120,5 @@ function logout() {
   localStorage.removeItem('zt_role');
   localStorage.removeItem('zt_student_id');
   localStorage.removeItem('zt_email');
-  window.location.href = './index (1).html';
+  window.location.href = './index.html';
 }

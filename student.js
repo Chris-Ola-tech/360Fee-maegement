@@ -19,7 +19,7 @@ async function guardStudent() {
   const role      = localStorage.getItem('zt_role');
   const studentId = localStorage.getItem('zt_student_id');
   if (role !== 'student' || !studentId) {
-    window.location.href = './index (1).html'; return;
+    window.location.href = './index.html'; return;
   }
   await loadStudentData(studentId);
 }
@@ -27,7 +27,7 @@ async function guardStudent() {
 function logout() {
   localStorage.removeItem('zt_role');
   localStorage.removeItem('zt_student_id');
-  window.location.href = './index (1).html';
+  window.location.href = './index.html';
 }
 
 async function loadStudentData(studentId) {

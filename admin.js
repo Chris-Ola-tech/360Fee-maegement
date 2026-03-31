@@ -24,7 +24,7 @@ function onSupabaseReady() {
 
 async function guardAdmin() {
   const role = localStorage.getItem('zt_role');
-  if (role !== 'admin') { window.location.href = './index (1).html'; return; }
+  if (role !== 'admin') { window.location.href = './index.html'; return; }
   const name = localStorage.getItem('zt_admin_name') || 'Admin';
   document.getElementById('adminNameDisplay').textContent = name;
   await loadAll();
@@ -33,7 +33,7 @@ async function guardAdmin() {
 
 function logout() {
   localStorage.clear();
-  window.location.href = './index (1).html';
+  window.location.href = './index.html';
 }
 
 // ── Load everything ──────────────────────────────────────────
