@@ -56,16 +56,16 @@ async function loadStudentData(studentId) {
 }
 
 function renderStudentDashboard(student, payments) {
-  const cycle    = calcCycle(student);
-  const initials = student.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-  const whatsapp = typeof WHATSAPP_NUMBER !== 'undefined' ? WHATSAPP_NUMBER : '';
+  // NOTE: showStudentWelcome() is called AFTER innerHTML is set — see bottom of this function
+  const cycle         = calcCycle(student);
+  const initials      = student.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  const whatsapp      = typeof WHATSAPP_NUMBER !== 'undefined' ? WHATSAPP_NUMBER : '';
   const timerPctClass = cycle.pct > 40 ? '' : cycle.pct > 15 ? 'warn' : 'danger';
 
   // ── Timer Block ──────────────────────────────────────────────
   let timerHtml = '';
 
   if (student.paused) {
-    // Paused
     timerHtml = `
       <div class="pause-banner">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -78,8 +78,7 @@ function renderStudentDashboard(student, payments) {
       </div>`;
 
   } else if (student.cycle_start && !cycle.expired) {
-    // ── Active cycle: show countdown for EVERYONE (paid or owing) ──
-    const isVIP    = student.vip_active;
+    const isVIP     = student.vip_active;
     const cardClass = isVIP ? 's-timer-card' : 's-timer-card s-timer-card--owing';
 
     timerHtml = `
@@ -110,7 +109,6 @@ function renderStudentDashboard(student, payments) {
       </div>`;
 
   } else if (student.cycle_start && cycle.expired && !student.vip_active) {
-    // Cycle ended without full payment or needs renewal
     const nextMonth = (student.month_number || 1) + 1;
     timerHtml = `
       <div class="alert-item alert-danger" style="margin-bottom:16px">
@@ -128,7 +126,6 @@ function renderStudentDashboard(student, payments) {
       </div>`;
 
   } else {
-    // No cycle at all (shouldn't happen with new code, but fallback)
     timerHtml = `
       <div class="alert-item alert-warning" style="margin-bottom:16px">
         <svg class="alert-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -143,7 +140,7 @@ function renderStudentDashboard(student, payments) {
       </div>`;
   }
 
-  // ── Payment Section (ALL students with a balance) ────────────
+  // ── Payment Section ──────────────────────────────────────────
   let payHtml = '';
   if (student.balance > 0) {
     const remaining = student.balance;
@@ -167,8 +164,7 @@ function renderStudentDashboard(student, payments) {
         <div class="account-details">
           <div class="acc-row"><span class="acc-label">Bank Name</span><span class="acc-value">Access Bank</span></div>
           <div class="acc-row"><span class="acc-label">Account Number</span>
-            <span class="acc-value acc-copy" onclick="copyText('0123456789')">0701705516 <small>tap to copy</small></span>
-            
+            <span class="acc-value acc-copy" onclick="copyText('0701705516')">0701705516 <small>tap to copy</small></span>
           </div>
           <div class="acc-row"><span class="acc-label">Account Name</span><span class="acc-value">OLUWATOSIN E OGUNDEYI</span></div>
           <div class="acc-row"><span class="acc-label">Amount to Pay</span>
@@ -209,7 +205,7 @@ function renderStudentDashboard(student, payments) {
       </div>`;
   }
 
-  // ── Render ───────────────────────────────────────────────────
+  // ── Render everything first ──────────────────────────────────
   document.getElementById('studentContent').innerHTML = `
     <div class="s-profile-header">
       <div class="s-ph-top">
@@ -256,8 +252,102 @@ function renderStudentDashboard(student, payments) {
     ${payHtml}
     ${histHtml}
   `;
+
+  // ── NOW inject the welcome banner AFTER innerHTML is set ─────
+  // This runs after the DOM is fully written so it won't get wiped
+  showStudentWelcome(student.name);
 }
 
 function copyText(text) {
   navigator.clipboard.writeText(text).then(() => showToast('Account number copied!', 'success'));
 }
+
+// ============================================================
+//  COOKIES & WELCOME
+// ============================================================
+
+const COOKIE_KEY  = '360academy_cookies_accepted';
+const WELCOME_KEY = '360academy_welcomed_';
+
+// ── Cookie Banner ────────────────────────────────────────────
+function initCookieBanner() {
+  if (localStorage.getItem(COOKIE_KEY)) return;
+
+  const banner = document.createElement('div');
+  banner.className = 'cookie-banner';
+  banner.id = 'cookieBanner';
+  banner.innerHTML = `
+    <div class="cookie-banner-text">
+      <strong>🍪 We use cookies</strong>
+      This website uses cookies and local storage to keep you logged in
+      and remember your preferences. By continuing to use 360 Academy,
+      you agree to our use of cookies.
+    </div>
+    <div class="cookie-banner-actions">
+      <button class="cookie-decline-btn" onclick="declineCookies()">Decline</button>
+      <button class="cookie-accept-btn"  onclick="acceptCookies()">Accept & Continue</button>
+    </div>
+  `;
+  document.body.appendChild(banner);
+}
+
+function acceptCookies() {
+  localStorage.setItem(COOKIE_KEY, 'accepted');
+  _dismissBanner();
+}
+
+function declineCookies() {
+  localStorage.setItem(COOKIE_KEY, 'declined');
+  _dismissBanner();
+}
+
+function _dismissBanner() {
+  const banner = document.getElementById('cookieBanner');
+  if (!banner) return;
+  banner.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+  banner.style.transform  = 'translateY(100%)';
+  banner.style.opacity    = '0';
+  setTimeout(() => banner.remove(), 350);
+}
+
+// ── Student Welcome Banner ───────────────────────────────────
+function showStudentWelcome(studentName) {
+  // Only show once per session
+  const sessionKey = WELCOME_KEY + 'student';
+  if (sessionStorage.getItem(sessionKey)) return;
+  sessionStorage.setItem(sessionKey, '1');
+
+  const hour      = new Date().getHours();
+  const greeting  = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const firstName = (studentName || 'Student').split(' ')[0];
+
+  const banner = document.createElement('div');
+  banner.className = 'student-welcome-banner';
+  banner.id        = 'studentWelcomeBanner';
+  banner.innerHTML = `
+    <div class="student-welcome-banner-icon">🎓</div>
+    <div class="student-welcome-text">
+      <strong>${greeting}, ${firstName}! Welcome back.</strong>
+      <span>Check your payment status and access details below.</span>
+    </div>
+  `;
+
+  // Insert at the very top of studentContent AFTER it has been rendered
+  const content = document.getElementById('studentContent');
+  if (content) {
+    content.insertBefore(banner, content.firstChild);
+  }
+
+  // Auto-dismiss after 6 seconds
+  setTimeout(() => {
+    if (banner && banner.parentNode) {
+      banner.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      banner.style.opacity    = '0';
+      banner.style.transform  = 'translateY(-10px)';
+      setTimeout(() => banner.remove(), 420);
+    }
+  }, 6000);
+}
+
+// Start cookie banner
+document.addEventListener('DOMContentLoaded', initCookieBanner);

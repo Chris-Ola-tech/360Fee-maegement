@@ -1761,3 +1761,247 @@ body {
 .owing-timer-note strong {
   color: var(--orange);
 }
+
+
+
+/* ── Cookie Consent Banner ────────────────────────────── */
+.cookie-banner {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--navy);
+  color: rgba(255,255,255,0.9);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 99999;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+  animation: slideUpBanner 0.4s ease;
+  flex-wrap: wrap;
+}
+
+@keyframes slideUpBanner {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.cookie-banner-text {
+  flex: 1;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  min-width: 200px;
+}
+
+.cookie-banner-text strong {
+  color: var(--gold-light);
+  display: block;
+  margin-bottom: 3px;
+  font-size: 0.92rem;
+}
+
+.cookie-banner-text a {
+  color: var(--gold-light);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cookie-banner-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.cookie-accept-btn {
+  padding: 9px 20px;
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.cookie-accept-btn:hover { background: var(--gold-light); }
+
+.cookie-decline-btn {
+  padding: 9px 16px;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.cookie-decline-btn:hover {
+  border-color: rgba(255,255,255,0.5);
+  color: white;
+}
+
+/* ── Welcome Toast (admin) ────────────────────────────── */
+.welcome-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13,27,42,0.6);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.welcome-modal {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 36px 32px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: modalIn 0.35s ease;
+  position: relative;
+}
+
+.welcome-modal-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--gold-pale);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  font-size: 1.8rem;
+}
+
+.welcome-modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.welcome-modal-sub {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.welcome-modal-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.welcome-modal-stat {
+  background: var(--off-white);
+  border-radius: 10px;
+  padding: 12px 8px;
+}
+
+.welcome-modal-stat-num {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.welcome-modal-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.welcome-modal-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--navy);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.welcome-modal-btn:hover { background: var(--navy-mid); }
+
+/* ── Welcome Banner (student portal) ─────────────────── */
+.student-welcome-banner {
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.student-welcome-banner::after {
+  content: '👋';
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2.5rem;
+  opacity: 0.3;
+}
+
+.student-welcome-banner-icon {
+  width: 46px;
+  height: 46px;
+  background: rgba(201,168,76,0.2);
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.student-welcome-text strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.student-welcome-text span {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.6);
+}
+
+@media (max-width: 640px) {
+  .cookie-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 16px 20px;
+  }
+  .cookie-banner-actions {
+    width: 100%;
+  }
+  .cookie-accept-btn,
+  .cookie-decline-btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+  .welcome-modal-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
