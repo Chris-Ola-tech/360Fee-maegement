@@ -165,11 +165,12 @@ function renderStudentDashboard(student, payments) {
           <span style="font-size:0.9rem;color:var(--text-muted);font-family:DM Sans,sans-serif">outstanding</span>
         </div>
         <div class="account-details">
-          <div class="acc-row"><span class="acc-label">Bank Name</span><span class="acc-value">First Bank of Nigeria</span></div>
+          <div class="acc-row"><span class="acc-label">Bank Name</span><span class="acc-value">Access Bank</span></div>
           <div class="acc-row"><span class="acc-label">Account Number</span>
-            <span class="acc-value acc-copy" onclick="copyText('0123456789')">0123456789 <small>tap to copy</small></span>
+            <span class="acc-value acc-copy" onclick="copyText('0123456789')">0701705516 <small>tap to copy</small></span>
+            
           </div>
-          <div class="acc-row"><span class="acc-label">Account Name</span><span class="acc-value">360 Academy</span></div>
+          <div class="acc-row"><span class="acc-label">Account Name</span><span class="acc-value">OLUWATOSIN E OGUNDEYI</span></div>
           <div class="acc-row"><span class="acc-label">Amount to Pay</span>
             <span class="acc-value" style="color:var(--red)">${formatNaira(remaining)}</span>
           </div>
