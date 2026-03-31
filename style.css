@@ -1733,3 +1733,31 @@ body {
     display: none;
   }
 }
+/* ── Owing student timer card variant ────────────────────── */
+.s-timer-card--owing {
+  border-color: #fed7aa !important;
+  background: #fffbeb !important;
+}
+
+.s-timer-card--owing .s-timer-title {
+  color: var(--orange);
+}
+
+.s-timer-card--owing .timer-days {
+  color: var(--orange);
+}
+
+.owing-timer-note {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.owing-timer-note strong {
+  color: var(--orange);
+}

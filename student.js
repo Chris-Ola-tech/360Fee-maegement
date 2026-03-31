@@ -1,12 +1,5 @@
 // ============================================================
 //  360 ACADEMY — STUDENT PORTAL  (student.js)
-//  Fixes:
-//  - ALL students can log in (login_id exists for everyone)
-//  - Payment section shown to owing students with account details
-//  - Serial (#001) only shown if student has completed full payment
-//  - No false "expired" label — cycle doesn't expire until 30 days
-//  - "Register New Month" shown when cycle ends (admin must approve)
-//  - Auto-expire removes VIP + serial after 30 days
 // ============================================================
 
 let studentData = null;
@@ -43,13 +36,13 @@ async function loadStudentData(studentId) {
 
   studentData = student;
 
-  // Auto-expire: if VIP but cycle has ended, deactivate
+  // Auto-expire: deactivate VIP if cycle has ended
   const cycle = calcCycle(student);
   if (cycle.expired && student.vip_active) {
     await db.from('students').update({
       vip_active: false,
       temp_vip:   false,
-      serial:     null       // serial becomes inactive on expiry
+      serial:     null
     }).eq('id', studentId);
     student.vip_active = false;
     student.temp_vip   = false;
@@ -66,13 +59,13 @@ function renderStudentDashboard(student, payments) {
   const cycle    = calcCycle(student);
   const initials = student.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   const whatsapp = typeof WHATSAPP_NUMBER !== 'undefined' ? WHATSAPP_NUMBER : '';
-
   const timerPctClass = cycle.pct > 40 ? '' : cycle.pct > 15 ? 'warn' : 'danger';
 
-  // ── Timer / Status Block ─────────────────────────────────────
+  // ── Timer Block ──────────────────────────────────────────────
   let timerHtml = '';
 
   if (student.paused) {
+    // Paused
     timerHtml = `
       <div class="pause-banner">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -84,30 +77,40 @@ function renderStudentDashboard(student, payments) {
         </div>
       </div>`;
 
-  } else if (student.vip_active && student.cycle_start) {
-    // Active VIP — show countdown
+  } else if (student.cycle_start && !cycle.expired) {
+    // ── Active cycle: show countdown for EVERYONE (paid or owing) ──
+    const isVIP    = student.vip_active;
+    const cardClass = isVIP ? 's-timer-card' : 's-timer-card s-timer-card--owing';
+
     timerHtml = `
-      <div class="s-timer-card">
-        <div class="s-timer-title">Access Cycle — Month ${student.month_number || 1}</div>
+      <div class="${cardClass}">
+        <div class="s-timer-title">
+          ${isVIP
+            ? `✅ Access Cycle — Month ${student.month_number || 1}`
+            : `⏳ Payment Countdown — Month ${student.month_number || 1}`}
+        </div>
         <div class="timer-days">${cycle.daysLeft}</div>
-        <div class="timer-days-label">days remaining</div>
+        <div class="timer-days-label">days remaining to complete payment</div>
         <div style="height:12px"></div>
         <div class="timer-bar-wrap">
           <div class="timer-bar ${timerPctClass}" style="width:${cycle.pct}%"></div>
         </div>
         <div class="timer-info">
           <span>Started: ${fmtDate(student.cycle_start)}</span>
-          <span>Expires: ${fmtDate(cycle.due)}</span>
+          <span>Due: ${fmtDate(cycle.due)}</span>
         </div>
-        ${cycle.daysLeft <= 5 && cycle.daysLeft > 0
-          ? `<div class="alert-item alert-warning" style="margin-top:14px">
-               ⚠️ Your access expires in <strong>${cycle.daysLeft} day${cycle.daysLeft !== 1 ? 's' : ''}</strong>. Please renew soon.
-             </div>`
-          : ''}
+        ${!isVIP ? `
+          <div class="owing-timer-note">
+            ⚠️ Complete your payment before <strong>${fmtDate(cycle.due)}</strong> to activate VIP access and receive your serial number.
+          </div>` : ''}
+        ${isVIP && cycle.daysLeft <= 5 && cycle.daysLeft > 0 ? `
+          <div class="alert-item alert-warning" style="margin-top:14px">
+            ⚠️ Your access expires in <strong>${cycle.daysLeft} day${cycle.daysLeft !== 1 ? 's' : ''}</strong>. Please renew soon.
+          </div>` : ''}
       </div>`;
 
-  } else if (cycle.expired && student.cycle_start && !student.vip_active) {
-    // Cycle ended — show renewal prompt (NOT "expired" — cycle expired, student didn't)
+  } else if (student.cycle_start && cycle.expired && !student.vip_active) {
+    // Cycle ended without full payment or needs renewal
     const nextMonth = (student.month_number || 1) + 1;
     timerHtml = `
       <div class="alert-item alert-danger" style="margin-bottom:16px">
@@ -118,14 +121,14 @@ function renderStudentDashboard(student, payments) {
         <div>
           <div class="alert-title">Your 30-day cycle has ended</div>
           <div class="alert-desc">
-            Your Month ${student.month_number || 1} access ended on ${fmtDate(cycle.due)}.
+            Month ${student.month_number || 1} ended on ${fmtDate(cycle.due)}.
             Please make payment to register Month ${nextMonth} and continue your access.
           </div>
         </div>
       </div>`;
 
-  } else if (!student.vip_active && !student.cycle_start) {
-    // New student, no cycle yet
+  } else {
+    // No cycle at all (shouldn't happen with new code, but fallback)
     timerHtml = `
       <div class="alert-item alert-warning" style="margin-bottom:16px">
         <svg class="alert-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -135,12 +138,12 @@ function renderStudentDashboard(student, payments) {
         </svg>
         <div>
           <div class="alert-title">No active cycle</div>
-          <div class="alert-desc">Complete your payment below to activate your VIP access and receive your serial number.</div>
+          <div class="alert-desc">Complete your payment below to activate your access.</div>
         </div>
       </div>`;
   }
 
-  // ── Payment Section (shown to ALL students with a balance) ───
+  // ── Payment Section (ALL students with a balance) ────────────
   let payHtml = '';
   if (student.balance > 0) {
     const remaining = student.balance;
@@ -155,7 +158,7 @@ function renderStudentDashboard(student, payments) {
       <div class="s-pay-section">
         <div class="s-pay-title">💳 Payment Required — Month ${student.month_number || 1}</div>
         <div class="s-pay-desc">
-          You have an outstanding balance. Make payment to the account below, then send your receipt to the admin via WhatsApp to have it recorded.
+          Make payment to the account below, then send your receipt to the admin via WhatsApp to have it recorded.
         </div>
         <div class="amount-owed-big">
           ${formatNaira(remaining)}
@@ -163,9 +166,13 @@ function renderStudentDashboard(student, payments) {
         </div>
         <div class="account-details">
           <div class="acc-row"><span class="acc-label">Bank Name</span><span class="acc-value">First Bank of Nigeria</span></div>
-          <div class="acc-row"><span class="acc-label">Account Number</span><span class="acc-value acc-copy" onclick="copyText('0123456789')">0123456789 <small>tap to copy</small></span></div>
+          <div class="acc-row"><span class="acc-label">Account Number</span>
+            <span class="acc-value acc-copy" onclick="copyText('0123456789')">0123456789 <small>tap to copy</small></span>
+          </div>
           <div class="acc-row"><span class="acc-label">Account Name</span><span class="acc-value">360 Academy</span></div>
-          <div class="acc-row"><span class="acc-label">Amount to Pay</span><span class="acc-value" style="color:var(--red)">${formatNaira(remaining)}</span></div>
+          <div class="acc-row"><span class="acc-label">Amount to Pay</span>
+            <span class="acc-value" style="color:var(--red)">${formatNaira(remaining)}</span>
+          </div>
         </div>
         <a class="btn-whatsapp" href="${waLink}" target="_blank" rel="noopener">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -201,7 +208,7 @@ function renderStudentDashboard(student, payments) {
       </div>`;
   }
 
-  // ── Profile Header ───────────────────────────────────────────
+  // ── Render ───────────────────────────────────────────────────
   document.getElementById('studentContent').innerHTML = `
     <div class="s-profile-header">
       <div class="s-ph-top">
@@ -224,7 +231,7 @@ function renderStudentDashboard(student, payments) {
           ? '<span class="badge badge-orange">Temporary Access</span>'
           : ''}
         ${!student.vip_active && !student.paused
-          ? '<span class="badge badge-grey">Inactive</span>'
+          ? '<span class="badge badge-grey">Awaiting Full Payment</span>'
           : ''}
       </div>
 
@@ -250,7 +257,6 @@ function renderStudentDashboard(student, payments) {
   `;
 }
 
-// ── Utility: copy account number ─────────────────────────────
 function copyText(text) {
   navigator.clipboard.writeText(text).then(() => showToast('Account number copied!', 'success'));
 }
