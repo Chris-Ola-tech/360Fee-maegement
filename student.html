@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>360 ACADEMY — Student Portal</title>
+  <link rel="stylesheet" href="./style.css"/>
+  <link rel="stylesheet" href="./student-mobile.css"/>  ← add this
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+   <link type="image/png" rel="icon" href="./assets/images/360.ico">
+</head>
+<body class="student-page">
+
+<header class="student-header">
+  <div class="student-header-inner">
+    <div class="student-brand">
+      <img src="./assets/images/360.jpeg" alt="Zenith"/>
+      <span>360 ACADEMY</span>
+    </div>
+    <button class="logout-btn-s" onclick="logout()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</header>
+
+<main class="student-main">
+  <div id="studentContent" class="student-content">
+    <div class="loading-state">Loading your profile...</div>
+  </div>
+</main>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script src="./supabase.js"></script>
+<script src="./student.js"></script>
+</body>
+</html>
